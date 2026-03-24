@@ -1,60 +1,28 @@
 #include <iostream>
 #include <vector>
-#include <string>
-#include <sstream>
-#include <iterator>
-#include <stack>
+#include <algorithm>
 
-std::vector<std::string> split_string(std::string const& s){
-    std::istringstream in(s); // transforme une chaîne en flux de caractères, cela simule un flux comme l'est std::cin
-    // l’itérateur va lire chaque element de "in", comme un flux d'entrée, chaque élément est séparé par un espace
-    return std::vector<std::string>(std::istream_iterator<std::string>(in), std::istream_iterator<std::string>()); 
-}
+bool is_sorted(std::vector<int> const& vec) { return std::is_sorted(vec.begin(), vec.end()); }
 
-bool is_floating(std::string const& s){
-    for (char c : s) {
-        if((!std::isdigit(c))&&(c!='.')){
-            return false;
-        }
-    } 
-    return true;
-}
-
-float npi_evaluate(std::vector<std::string> const& tokens){
-    std::stack<float> stack;
-    for(std::string token : tokens){
-        if(is_floating(token)){
-            stack.push(std::stof(token));
-        } else {
-            // Je récupère l'élément en haut de la pile
-            float rightOperand { stack.top() };
-            // Je l'enlève de la stack (la méthode top ne fait que lire l’élément en dessus de la pile)
-            stack.pop();
-            float leftOperand { stack.top() };
-            stack.pop();
-            // Il faut ensuite en fonction de l'opérateur calculer le résultat pour le remettre dans la pile
-            float result{};
-            if(token=="+"){
-                result = leftOperand+rightOperand;
-            } else if(token=="-"){
-                result = leftOperand-rightOperand;
-            } else if(token=="*"){
-                result = leftOperand*rightOperand;
-            } else if(token=="/"){
-                result = leftOperand/rightOperand;
+void bubble_sort(std::vector<int> & vec){
+    size_t const size = vec.size();
+    for (size_t i {0}; i<size;i++){
+        for (size_t j {0};j<size-(i+1);j++){
+            if(vec[j]>vec[j+1]){
+                std::swap(vec[j], vec[j+1]);
             }
-            stack.push(result);
         }
-    } return stack.top();
+    }
 }
 
 int main(){
-    std::string expression;
-
-    std::cout << "Entrez une expression en notation polonaise inversee : ";
-    std::getline(std::cin, expression);
-
-    std::cout << "Expression saisie : '" << expression <<"'"<< std::endl;
-    std::vector<std::string> tokens = split_string(expression);
-    std::cout << "Le resultat est : "<< npi_evaluate(tokens) << std::endl;
+    std::vector<int> array {9, 8, 6, 7, 5, 4, 1, 2, 3};
+    if (!is_sorted(array)) {
+        bubble_sort(array);
+    }
+    std::cout << "Le tableau est trie, voici les valeurs : ";
+    for ( int i : array){
+        std::cout<< i << ", ";
+    } std::cout << std::endl;
+    return 0;
 }
