@@ -1,100 +1,61 @@
 #include <iostream>
 #include <vector>
-#include <string>
-#include <sstream>
-#include <iterator>
-#include <stack>
+#include <algorithm>
 
-enum class Operator { ADD, SUB, MUL, DIV};
-enum class TokenType { OPERATOR, OPERAND };
-struct Token {
-  TokenType type;
-  float value;
-  Operator op;
-};
+bool is_sorted(std::vector<int> const& vec) { return std::is_sorted(vec.begin(), vec.end()); }
 
-Token make_token(float value){
-    return Token{TokenType::OPERAND, value};
+void printVec(std::vector<int> & vec){
+    for ( int i : vec){
+            std::cout<< i << ", ";
+        } std::cout << std::endl;
 }
 
-Token make_token(Operator op){
-    return Token{TokenType::OPERATOR, 0, op};
-}
-
-bool is_floating(std::string const& s){
-    for (char c : s) {
-        if((!std::isdigit(c))&&(c!='.')){
-            return false;
-        }
-    } 
-    return true;
-}
-
-std::vector<Token> tokenize(std::vector<std::string> const& words){
-    int vectorSize = words.size();
-    std::vector<Token> tokens(vectorSize);
-    for(int i = 0; i<vectorSize; i++){
-        std::string word = words[i];
-        Token token{};
-        if(is_floating(word)){
-            token = make_token(std::stof(word));
+void merge_sort_merge(std::vector<int>& vec, size_t left, size_t middle, size_t right) {
+    std::vector<int> temp = vec;
+    size_t i = left;
+    size_t j = middle + 1; 
+    size_t k = left;
+    while (i <= middle && j <= right) {
+        if (temp[i] <= temp[j]) {
+            vec[k] = temp[i];
+            ++i;
         } else {
-            if(word=="+"){
-                token = make_token(Operator::ADD);
-            } else if(word=="-"){
-                token = make_token(Operator::SUB);
-            } else if(word=="*"){
-                token = make_token(Operator::MUL);
-            } else if(word=="/"){
-                token = make_token(Operator::DIV);
-            }
-        }
-        tokens[i] = token;
+            vec[k] = temp[j];
+            ++j;
+        } k++;
     }
-    return tokens;
+    while (i <= middle) {
+        vec[k] = temp[i];
+        ++i;
+        ++k;
+    }
+    while (j <= right) {
+        vec[k] = temp[j];
+        ++j;
+        ++k;
+    }
 }
 
-std::vector<std::string> split_string(std::string const& s){
-    std::istringstream in(s); // transforme une chaîne en flux de caractères, cela simule un flux comme l'est std::cin
-    // l’itérateur va lire chaque element de "in", comme un flux d'entrée, chaque élément est séparé par un espace
-    return std::vector<std::string>(std::istream_iterator<std::string>(in), std::istream_iterator<std::string>()); 
+void merge_sort(std::vector<int> & vec, size_t const left, size_t const right){
+    if (left >= right) {
+        return;
+    }
+    size_t middle = left + (right - left) / 2;
+    merge_sort(vec, left, middle);
+    merge_sort(vec, middle + 1, right);
+    merge_sort_merge(vec, left, middle, right);
 }
 
-float npi_evaluate(std::vector<Token> const& tokens){
-    std::stack<float> stack;
-    for(Token token : tokens){
-        if(token.type==TokenType::OPERAND){
-            stack.push(token.value);
-        } else {
-            // Je récupère l'élément en haut de la pile
-            float rightOperand { stack.top() };
-            // Je l'enlève de la stack (la méthode top ne fait que lire l’élément en dessus de la pile)
-            stack.pop();
-            float leftOperand { stack.top() };
-            stack.pop();
-            // Il faut ensuite en fonction de l'opérateur calculer le résultat pour le remettre dans la pile
-            float result{};
-            if(token.op==Operator::ADD){
-                result = leftOperand+rightOperand;
-            } else if(token.op==Operator::SUB){
-                result = leftOperand-rightOperand;
-            } else if(token.op==Operator::MUL){
-                result = leftOperand*rightOperand;
-            } else if(token.op==Operator::DIV){
-                result = leftOperand/rightOperand;
-            }
-            stack.push(result);
-        }
-    } return stack.top();
+void merge_sort(std::vector<int> & vec) {
+    merge_sort(vec, 0, vec.size() - 1);
 }
 
 int main(){
-    std::string expression;
-
-    std::cout << "Entrez une expression en notation polonaise inversee : ";
-    std::getline(std::cin, expression);
-
-    std::cout << "Expression saisie : '" << expression <<"'"<< std::endl;
-    std::vector<Token> tokens = tokenize(split_string(expression));
-    std::cout << "Le resultat est : "<< npi_evaluate(tokens) << std::endl;
+    std::vector<int> array {9, 8, 6, 7, 5, 4, 1, 2, 3};
+    if (!is_sorted(array)) {
+        merge_sort(array);
+    }
+    std::cout << "Le tableau est trie, voici les valeurs : ";
+    printVec(array);
+    return 0;
 }
